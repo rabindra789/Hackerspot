@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const sessionSchema = new mongoose.Schema({
     userid: {
@@ -15,12 +15,18 @@ const sessionSchema = new mongoose.Schema({
     },
     systemreponse: {
         type: String,
-        required: true
+        required: true,
+    },
+    systemResponse: String,
+    interactionContext: String,
+    savedData: { 
+        type: Object, 
+        default: null 
     },
     createdAt: {
         type: Date,
         default: Date.now,
-    }
+    },
 });
 
 const Session = mongoose.model("Session", sessionSchema);
