@@ -53,7 +53,7 @@ This project combines modern AI tools with a user-friendly API and PWA dashboard
 ### Installation
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-repo/ai-assistant
+   git clone https://github.com/rabindra789/Hackerspot
    cd ai-assistant
    ```
 
@@ -87,10 +87,11 @@ This project combines modern AI tools with a user-friendly API and PWA dashboard
 3. Manage results on the dashboard.
 
 ---
+
 ## Author
-1. [Author Name](Role) - [GitHub](GitHub Link)
-2. [Author Name](Role) - [GitHub](GitHub Link)
-3. [Author Name](Role) - [GitHub](GitHub Link)
+1. [Rohan Bhoi](https://github.com/RohanBhoi-7064)
+2. [Swayam Kumar Sahu](https://github.com/swayam-1404)
+3. [Rabindra Kumar Meher](https://github.com/rabindra789)
    
 ---
 
