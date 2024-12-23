@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accessible Camera App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: grey;
+            color: black;
+            text-align: center;
+            padding: 20px;
+        }
+        h1 {
+            font-size: 2.5em;
+        }
+        #camera-container {
+            margin: 20px 0;
+        }
+        video {
+            width: 100%;
+            max-width: 500px;
+            border: 3px solid #fff;
+        }
+    </style>
+</head>
+<body>
+    <h1>Camera Access </h1>
+    <div id="camera-container">
+        <video id="camera" autoplay></video>
+    </div>
+
+    <script>
+        const cameraVideo = document.getElementById('camera');
+        window.addEventListener('load', async () => {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                cameraVideo.srcObject = stream;
+            } catch (error) {
+                alert('Camera access is not available or permission was denied.');
+            }
+        });
+    </script>
+<h2>Explore World </h2>
+
+</body>
+</html>
