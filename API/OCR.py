@@ -5,7 +5,7 @@ import io
 
 app = Flask(__name__)
 
-@app.route('/OCT', methods=['POST'])
+@app.route('/ocr', methods=['POST'])
 def extract_text():
     if 'image' not in request.files:
         return jsonify({'error': 'No image file provided'}), 400
