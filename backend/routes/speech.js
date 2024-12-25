@@ -7,11 +7,11 @@ const upload = multer({ dest: 'uploads/' });
 // Speech-to-Text Route
 router.post('/', upload.single('audio'), async (req, res) => {
   try {
-    const audioFile = req.file;
+    const filePath = req.file.path;
     const formData = new FormData();
-    formData.append('audio', audioFile.path);
+    formData.append('file', fs.createReadStream(filePath));
 
-    const response = await axios.post('http://localhost:5003/api/speech-to-text', formData, {
+    const response = await axios.post('http://localhost:5003/api/speech', formData, {
       headers: formData.getHeaders(),
     });
     res.json(response.data);

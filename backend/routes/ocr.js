@@ -1,15 +1,26 @@
 const express = require('express');
-const axios = require('axios');
 const router = express.Router();
+const axios = require('axios');
+const multer = require('multer');
 
-// OCR Route
-router.post('/', async (req, res) => {
+// Configure multer for file uploads
+const upload = multer({ dest: 'uploads/' });
+
+router.post('/', upload.single('image'), async (req, res) => {
   try {
-    const image = req.body.image;
-    const response = await axios.post('http://localhost:5002/api/ocr', { image });
+    const filePath = req.file.path;
+
+    const formData = new FormData();
+    formData.append('image', fs.createReadStream(filePath));
+
+    const response = await axios.post('http://localhost:5000/api/ocr', formData, {
+      headers: formData.getHeaders(),
+    });
+
+    // Send Flask response back to client
     res.json(response.data);
   } catch (error) {
-    res.status(500).json({ error: 'Error performing OCR' });
+    res.status(500).json({ error: 'Error processing OCR', details: error.message });
   }
 });
 
