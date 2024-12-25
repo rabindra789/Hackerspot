@@ -1,2 +1,6 @@
 node_modules/
 .env
+venv
+yolov3.weights
+yolov3.cfg
+coco.names

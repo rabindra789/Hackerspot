@@ -11,21 +11,27 @@ const ocrRoutes = require('./routes/ocr');
 const speechRoutes = require('./routes/speech');
 const speakRoutes = require('./routes/speak');
 const feedbackRoutes = require('./routes/feedback');
+const fileUpload = require('express-fileupload');
 
 const app = express();
 
 // Middleware
 app.use(cors());
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: '50mb' }));
+app.use(
+  bodyParser.urlencoded({
+    extended: true,
+  })
+);
 app.use(passport.initialize());
-
+app.use(fileUpload());
 // Routes
-app.use('/api/auth',isLoggedIn ,authRoutes);
-app.use('/api/detect', isLoggedIn, detectRoutes);
-app.use('/api/ocr', isLoggedIn, ocrRoutes);
-app.use('/api/speech', isLoggedIn, speechRoutes);
-app.use('/api/speak', isLoggedIn, speakRoutes);
-app.use('/api/feedback', isLoggedIn, feedbackRoutes);
+app.use('/api/auth' ,authRoutes);
+app.use('/api/detect', detectRoutes);
+app.use('/api/ocr', ocrRoutes);
+app.use('/api/speech', speechRoutes);
+app.use('/api/speak', speakRoutes);
+app.use('/api/feedback', feedbackRoutes);
 
 
 // Connect to MongoDB
