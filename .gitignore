@@ -3,4 +3,4 @@ node_modules/
 venv
 yolov3.weights
 yolov3.cfg
-coco.names
+*.names

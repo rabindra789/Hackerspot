@@ -1,8 +1,8 @@
 
-# Title - 
+# VisionAid - 
 
 ## Overview
-The **Title** is a real-time, context-aware solution designed to assist users by integrating AI functionalities such as:
+The **VisionAid** is a real-time, context-aware solution designed to assist users by integrating AI functionalities such as:
 - Object detection
 - Text recognition (OCR)
 - Speech-to-text and text-to-speech
@@ -54,7 +54,7 @@ This project combines modern AI tools with a user-friendly API and PWA dashboard
 1. Clone the repository:
    ```bash
    git clone https://github.com/rabindra789/Hackerspot
-   cd ai-assistant
+   cd Hackerspot
    ```
 
 2. Install dependencies:
