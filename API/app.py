@@ -12,6 +12,8 @@ import cv2
 import numpy as np
 from bson.json_util import dumps
 import io
+import time
+from ultralytics import YOLO
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -33,47 +35,14 @@ UPLOAD_FOLDER = 'uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-# Load YOLO model and class names
-def load_yolo():
-    net = cv2.dnn.readNet("yolov3.weights", "yolov3.cfg")
-    layer_names = net.getLayerNames()
-    out_layers_indices = net.getUnconnectedOutLayers()
-    if len(out_layers_indices) == 0:
-        raise ValueError("No unconnected output layers found.")
-    output_layers = [layer_names[i - 1] for i in out_layers_indices.flatten()]
-    return net, output_layers
-
-def load_class_names():
-    with open("coco.names", "r") as f:
-        class_names = [line.strip() for line in f.readlines()]
-    return class_names
-
-# Initialize YOLO
-net, output_layers = load_yolo()
-class_names = load_class_names()
-
-# Object Detection Function to detect image
-def detect_objects(image, confidence_threshold=0.5):
-    height, width, _ = image.shape
-    blob = cv2.dnn.blobFromImage(image, 0.00392, (416, 416), (0, 0, 0), True, crop=False)
-    net.setInput(blob)
-    outputs = net.forward(output_layers)
-
-    boxes, confidences, class_ids = [], [], []
-    for output in outputs:
-        for detection in output:
-            scores = detection[5:]
-            class_id = np.argmax(scores)
-            confidence = scores[class_id]
-            if confidence > confidence_threshold:
-                center_x, center_y, w, h = (detection[0:4] * np.array([width, height, width, height])).astype('int')
-                x = int(center_x - w / 2)
-                y = int(center_y - h / 2)
-                boxes.append([x, y, w, h])
-                confidences.append(float(confidence))
-                class_ids.append(class_id)
-
-    return boxes, confidences, class_ids
+# Load YOLOv11 model
+print("Loading YOLOv11 model...")
+try:
+    model = YOLO("yolo11m.pt")  # Ensure the model file is in the correct path
+    print("YOLOv11 model loaded successfully.")
+except Exception as e:
+    print(f"Error loading YOLOv11 model: {e}")
+    model = None
 
 # Route: Text Generation (ask.py functionality)
 @app.route('/api/ask', methods=['POST'])
@@ -94,33 +63,22 @@ def generate_text():
         return jsonify({"error": str(e)}), 500
 
 # Route: OCR (OCR.py functionality)
-
 @app.route('/api/ocr', methods=['POST'])
 def extract_text():
     try:
-        # Ensure 'image' is in request.files
         if 'image' not in request.files:
             return jsonify({'error': 'No image file provided'}), 400
 
         file = request.files['image']
 
-        # Ensure the file has a valid name (i.e., it isn't empty)
         if file.filename == '':
             return jsonify({'error': 'No selected file'}), 400
 
-        # Read the image file from the request stream
         image = Image.open(file.stream)
-
-        # Use pytesseract to extract text from the image
         text = pytesseract.image_to_string(image)
-
-        # Return the extracted text in JSON format
         return jsonify({'extracted_text': text}), 200
 
     except Exception as e:
-        # Capture the exception with traceback and log it for debugging
-        error_details = traceback.format_exc()
-        print(f"Error processing image: {error_details}")  # Log full stack trace
         return jsonify({'error': f'An error occurred while processing the image: {str(e)}'}), 500
 
 # Route: Speech-to-Text (speech.py functionality)
@@ -170,6 +128,9 @@ def text_to_speech():
 # Route: Object Detection
 @app.route('/api/detect', methods=['POST'])
 def detect():
+    if not model:
+        return jsonify({'error': 'YOLO model not loaded'}), 500
+
     if 'file' not in request.files:
         return jsonify({'error': 'No file part'}), 400
 
@@ -177,24 +138,41 @@ def detect():
     if file.filename == '':
         return jsonify({'error': 'No selected file'}), 400
 
-    # Reading the image
-    img = cv2.imdecode(np.frombuffer(file.read(), np.uint8), cv2.IMREAD_COLOR)
+    img_data = np.frombuffer(file.read(), np.uint8)
+    img = cv2.imdecode(img_data, cv2.IMREAD_COLOR)
+
     if img is None:
         return jsonify({'error': 'Invalid image format'}), 400
 
-    boxes, confidences, class_ids = detect_objects(img)
+    start_time = time.time()
 
-    # Preparing response
-    results = []
-    for i in range(len(boxes)):
-        results.append({
-            'box': [int(coord) for coord in boxes[i]],  # Converting to integer
-            'confidence': float(confidences[i]),  # Ensure confidence is a float
-            'class_id': int(class_ids[i]),  # Converting to int
-            'class_name': class_names[class_ids[i]]  # Get the class name
-        })
+    try:
+        results = model.predict(img, conf=0.3)
 
-    return jsonify(results)
+        detections = []
+        for result in results:
+            boxes = result.boxes.data
+            for box in boxes:
+                x1, y1, x2, y2, conf, class_id = box.tolist()
+                detections.append({
+                    'box': [int(x1), int(y1), int(x2), int(y2)],
+                    'confidence': float(conf),
+                    'class_id': int(class_id),
+                    'class_name': model.names[int(class_id)]
+                })
+
+        processing_time = time.time() - start_time
+
+        response = {
+            'total_detections': len(detections),
+            'detections': detections,
+            'processing_time': processing_time
+        }
+
+        return jsonify(response)
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 # Route: Submit Feedback (POST)
 @app.route('/api/feedback', methods=['POST'])
@@ -203,14 +181,13 @@ def submit_feedback():
         data = request.json
         if not data or 'user_name' not in data or 'message' not in data:
             return jsonify({"error": "Invalid input"}), 400
-        
+
         feedback = {
             "user_name": data['user_name'],
             "message": data['message'],
-            "timestamp": data.get('timestamp', None)  # Optional timestamp
+            "timestamp": data.get('timestamp', None)
         }
 
-        # Send feedback to backend
         response = requests.post(BACKEND_URL, json=feedback)
         if response.status_code == 200:
             return jsonify({"message": "Feedback sent successfully!"}), 200
@@ -228,6 +205,14 @@ def get_feedback():
         return dumps(feedback_list), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@app.errorhandler(404)
+def not_found(error):
+    return jsonify({'error': 'Not found'}), 404
+
+@app.errorhandler(500)
+def internal_server_error(error):
+    return jsonify({'error': 'Internal server error'}), 500
 
 # Run the Flask application
 if __name__ == '__main__':
