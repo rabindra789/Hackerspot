@@ -1,79 +1,61 @@
 import cv2
 import numpy as np
 from flask import Flask, request, jsonify
+from ultralytics import YOLO
+import time
 
 app = Flask(__name__)
 
-# Loading YOLO
-def load_yolo():
-    net = cv2.dnn.readNet("yolov3.weights", "yolov3.cfg")
-    layer_names = net.getLayerNames()
-    out_layers_indices = net.getUnconnectedOutLayers()
-    if len(out_layers_indices) == 0:
-        raise ValueError("No unconnected output layers found.")
-    output_layers = [layer_names[i - 1] for i in out_layers_indices.flatten()]
-    return net, output_layers
-
-# Loading class names
-def load_class_names():
-    with open("coco.names", "r") as f:
-        class_names = [line.strip() for line in f.readlines()]
-    return class_names
-
-# Object Detection Function to detect image
-def detect_objects(image, confidence_threshold=0.5):
-    height, width, _ = image.shape
-    blob = cv2.dnn.blobFromImage(image, 0.00392, (416, 416), (0, 0, 0), True, crop=False)
-    net.setInput(blob)
-    outputs = net.forward(output_layers)
-
-    boxes, confidences, class_ids = [], [], []
-    for output in outputs:
-        for detection in output:
-            scores = detection[5:]
-            class_id = np.argmax(scores)
-            confidence = scores[class_id]
-            if confidence > confidence_threshold:
-                center_x, center_y, w, h = (detection[0:4] * np.array([width, height, width, height])).astype('int')
-                x = int(center_x - w / 2)
-                y = int(center_y - h / 2)
-                boxes.append([x, y, w, h])
-                confidences.append(float(confidence))
-                class_ids.append(class_id)
-
-    return boxes, confidences, class_ids
-
-# Initialize YOLO and class names for detection
-net, output_layers = load_yolo()
-class_names = load_class_names()
+# Load the YOLOv11 model
+model = YOLO("yolo11m.pt")  # Ensure the model file is in the correct path
 
 @app.route('/detect', methods=['POST'])
 def detect():
+    # Check if the file part is present in the request
     if 'file' not in request.files:
         return jsonify({'error': 'No file part'}), 400
 
     file = request.files['file']
+    # Check if a file was selected
     if file.filename == '':
         return jsonify({'error': 'No selected file'}), 400
 
-    # Reading the image
-    img = cv2.imdecode(np.frombuffer(file.read(), np.uint8), cv2.IMREAD_COLOR)
+    # Read the image from the uploaded file
+    img_data = np.frombuffer(file.read(), np.uint8)
+    img = cv2.imdecode(img_data, cv2.IMREAD_COLOR)
+    
+    # Validate the image format
     if img is None:
         return jsonify({'error': 'Invalid image format'}), 400
 
-    boxes, confidences, class_ids = detect_objects(img)
+    start_time = time.time()  # Start time for performance measurement
 
-    # Preparing response
-    results = []
-    for i in range(len(boxes)):
-        results.append({
-            'box': [int(coord) for coord in boxes[i]],  # Converting to integer
-            'confidence': float(confidences[i]),  # Ensure confidence is a float
-            'class_id': int(class_ids[i]),  # Converting to int
-            'class_name': class_names[class_ids[i]]  # Get the class name
-        })
+    # Run inference with a confidence threshold
+    results = model.predict(img, conf=0.3)  # Adjust confidence threshold as needed
 
-    return jsonify(results)
+    detections = []
+    for result in results:
+        boxes = result.boxes.data  # Get bounding boxes
+        for box in boxes:
+            x1, y1, x2, y2, conf, class_id = box.tolist()  # Extract box coordinates and class info
+            detections.append({
+                'box': [int(x1), int(y1), int(x2), int(y2)],  # Bounding box coordinates
+                'confidence': float(conf),  # Confidence score
+                'class_id': int(class_id),  # Class ID
+                'class_name': model.names[int(class_id)]  # Class name
+            })
+
+    end_time = time.time()  # End time for performance measurement
+    processing_time = end_time - start_time
+
+    # Prepare the response
+    response = {
+        'total_detections': len(detections),  # Total number of detections
+        'detections': detections,
+        'processing_time': processing_time  # Time taken for processing
+    }
+
+    return jsonify(response)
 
 @app.errorhandler(404)
 def not_found(error):
