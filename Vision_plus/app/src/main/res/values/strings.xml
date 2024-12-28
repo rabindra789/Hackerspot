@@ -1,6 +1,0 @@
-<resources>
-    <string name="app_name">Vision +</string>
-    <string name="capture_button_description">Capture Image</string>
-    <string name="flip_camera_description">Flip Camera</string>
-    <string name="toggle_flash_description">Toggle Flash</string>
-</resources>

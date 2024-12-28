@@ -1,3 +1,0 @@
-com.example.visionAid.test
-style WhiteBackgroundDialogTheme
-style WhiteBackgroundTheme
