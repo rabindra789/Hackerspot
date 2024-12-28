@@ -1,8 +1,8 @@
 
-# VisionAid - 
+# Vision +
 
 ## Overview
-The **VisionAid** is a real-time, context-aware solution designed to assist users by integrating AI functionalities such as:
+The **Vision +** is a real-time, context-aware solution designed to assist users by integrating AI functionalities such as:
 - Object detection
 - Text recognition (OCR)
 - Speech-to-text and text-to-speech
