@@ -1,0 +1,19 @@
+{
+    "logs": [
+        {
+            "outputFile": "com.example.visionAid.app-mergeDebugResources-48:/values-port/values-port.xml",
+            "map": [
+                {
+                    "source": "/home/rabindra18/.gradle/caches/8.9/transforms/7a7cf4c825482e252b6bef70945fc727/transformed/appcompat-1.6.1/res/values-port/values-port.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endColumns": "55",
+                        "endOffsets": "106"
+                    }
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,68 @@
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android' version '2.0.0' apply false
+
+}
+
+android {
+    namespace 'com.example.visionAid'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.example.visionAid"
+        minSdk 24
+        targetSdk 33
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    // Enabling multi-dex support for larger projects
+    defaultConfig {
+        multiDexEnabled true
+    }
+}
+
+dependencies {
+    // CameraX dependencies
+    implementation 'androidx.camera:camera-core:1.2.2'
+    implementation 'androidx.camera:camera-camera2:1.2.2'
+    implementation 'androidx.camera:camera-lifecycle:1.2.2'
+    implementation 'androidx.camera:camera-view:1.2.2'
+    implementation("androidx.navigation:navigation-fragment:2.8.5") {
+        exclude(group: "org.jetbrains.kotlin", module: "kotlin-stdlib-jdk8")
+    }
+
+    // Testing libraries
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+
+    // Network and image upload dependencies
+    implementation 'com.squareup.okhttp3:okhttp:4.10.0'  // For HTTP requests
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.10.0' // Optional, for logging network requests
+    implementation 'com.squareup.okhttp3:okhttp-urlconnection:4.10.0'
+
+    // TTS API or other multimedia support
+    implementation 'androidx.media2:media2-session:1.2.1'  // If using media sessions for audio playback
+
+    // TTS dependency
+    implementation('androidx.appcompat:appcompat:1.6.1')
+    implementation("com.google.android.material:material:1.9.0")
+    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+    implementation("androidx.navigation:navigation-fragment:2.6.0")
+    implementation("androidx.navigation:navigation-ui:2.6.0")
+}

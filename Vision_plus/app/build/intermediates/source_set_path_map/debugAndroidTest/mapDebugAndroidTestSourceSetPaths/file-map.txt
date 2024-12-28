@@ -1,0 +1,6 @@
+com.example.visionAid.test.app-core-1.5.0-0 /home/rabindra18/.gradle/caches/8.9/transforms/82c2ffb86ffb17ac0818a1e05f451609/transformed/core-1.5.0/res
+com.example.visionAid.test.app-annotation-experimental-1.4.1-1 /home/rabindra18/.gradle/caches/8.9/transforms/ec2a3d141c180ad55e2138fcc3be2e8c/transformed/annotation-experimental-1.4.1/res
+com.example.visionAid.test.app-androidTest-2 /home/rabindra18/Desktop/Android-Camera-using-CameraX/app/build/generated/res/resValues/androidTest/debug
+com.example.visionAid.test.app-mergeDebugAndroidTestResources-3 /home/rabindra18/Desktop/Android-Camera-using-CameraX/app/build/intermediates/incremental/debugAndroidTest/mergeDebugAndroidTestResources/merged.dir
+com.example.visionAid.test.app-mergeDebugAndroidTestResources-4 /home/rabindra18/Desktop/Android-Camera-using-CameraX/app/build/intermediates/incremental/debugAndroidTest/mergeDebugAndroidTestResources/stripped.dir
+com.example.visionAid.test.app-debugAndroidTest-5 /home/rabindra18/Desktop/Android-Camera-using-CameraX/app/build/intermediates/merged_res/debugAndroidTest/mergeDebugAndroidTestResources
